@@ -40,6 +40,7 @@ options.prog      = 0;
 options.dense     = 0;
 options.homography = 0; % 0 3x3 / 1 affine / 2 homography
 options.id_lut    = strcat(pwd,'/src/lut/id_lut33.mat');
+options.limit     = 0.75; % limit after which the homography will be less applied
       
 startTime = tic;
 

@@ -29,6 +29,7 @@ if nargin == 3
     spread    = options.spread;
     prog      = options.prog;
     id_lut    = cell2mat(struct2cell(load(options.id_lut)));
+    limit     = options.limit;
     if isempty(save_file)
         to_save = 0;
     else
@@ -136,7 +137,7 @@ for i = center
         case 0
             values{i} = compute_colorstabilization( double( imresize(im{i}, factor(1),'bilinear', 'Colormap', 'original') )./max_im, ...
                 im_med, im_med_exp0,  ...
-                coef, clip, gamma, use_sift, [] );
+                coef, clip, gamma, use_sift, [] , limit);
         case 1
             values{i} = compute_colorstabilization_aff( double( imresize(im{i}, factor(1), 'Colormap', 'original') )./max_im, ...
                 im_med, im_med_exp0,  ...
@@ -148,7 +149,7 @@ for i = center
             
     end
     if to_save
-        l=0.75^values{i}.gamma(1);
+        l=limit^values{i}.gamma(1);
         lut = id_lut .^ values{i}.gamma(1); 
         Id = mean(sum(values{i}.H,2))*eye(3);
         RGB = lut>l;
@@ -227,7 +228,7 @@ for nbr = 1:nbrContours
                     
                     values{i} = compute_colorstabilization( double( imresize(im{i},factor(1),'bilinear' , 'Colormap', 'original') )./max_im, ...
                     im_med, imresize(values{image(2)}.I1exp0, factor(2),'bilinear', 'Colormap', 'original'),  ...
-                    coef, clip, gamma, use_sift,[]);%[values{exp_neighbour}.gamma(1) values{exp_neighbour}.H(:)'] );
+                    coef, clip, gamma, use_sift,[],limit);%[values{exp_neighbour}.gamma(1) values{exp_neighbour}.H(:)'] );
                 end
             case 1
                 values{i} = compute_colorstabilization_aff( double( imresize(im{i}, factor(1), 'Colormap', 'original') )./max_im, ...
@@ -239,7 +240,7 @@ for nbr = 1:nbrContours
                     coef, clip, gamma, use_sift );
         end
         if to_save
-            l=0.75^values{i}.gamma(1);
+            l=limit^values{i}.gamma(1);
             lut = id_lut .^ values{i}.gamma(1); 
             Id = mean(sum(values{i}.H,2))*eye(3);
             RGB = lut>l;

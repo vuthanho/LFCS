@@ -1,4 +1,4 @@
-function values = compute_colorstabilization( I1, I1tmp, I2tmp, coef, clip_v, gamma_ref, use_sift, ref_ref )
+function values = compute_colorstabilization( I1, I1tmp, I2tmp, coef, clip_v, gamma_ref, use_sift, ref_ref, limit )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% Color matrix and gamma estimation given two image filename
@@ -12,6 +12,7 @@ function values = compute_colorstabilization( I1, I1tmp, I2tmp, coef, clip_v, ga
 %%          6. gamma_ref -> gamma reference value
 %%          7. use_sift -> 1-compute sift correspondences / 0-whole image pixels
 %%          8. ref_ref -> gamma and H lastly used by ref
+%%          9. limit -> limit after which the homography will be less applied
 %%
 %% Outputs: 1. values -> struct with -H (homography), 
 %%                                    -gammas (estimated gamma values) 
@@ -165,7 +166,7 @@ disp(['    Gamma values: ', num2str(gammas(1)), ' & ', num2str(gammas(2)) ])
 
 %% Apply gamma and H transformation to full size (original) images
 %% Apply estimated gammas to the original images
-l=0.65^gammas(1);
+l=limit^gammas(1);
 
 % % % gammaZZZ = interp1([0 l/2 l 1],[gammas(1) gammas(1) gammas(1) 1],mean(reshape(I1, [], 3),2),'pchip');
 I1(I1<0)=0;
