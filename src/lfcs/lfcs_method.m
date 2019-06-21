@@ -188,8 +188,9 @@ else
 end
 
 %% Whole calculation
-
-L_factor = interp1([0 nbrContours],[prog factor(2)],0:nbrContours);
+if nbrContours~=0
+    L_factor = interp1([0 nbrContours],[prog factor(2)],0:nbrContours);
+end
 for nbr = 1:nbrContours
     if prog
         factor(2) = L_factor(nbr+1);

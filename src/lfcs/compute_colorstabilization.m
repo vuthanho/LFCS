@@ -78,22 +78,22 @@ end
 
 %% removes the correspondences in the MacBeth Color Checker to prove that the algorithm works without it
 
-[heigth,width,~] = size(I1); 
-CCCor=CCFind(I1(1:round(heigth/2),round(width/2):width,:));
-if ~isempty(CCCor)
-    M1=min(CCCor);
-    M2=max(CCCor);
-    P1=M1-0.5*[1/5 1/3].*(M2-M1);
-    P2=M2+0.5*[1/5 1/3].*(M2-M1);
-    P1=floor(length(I1tmp)/length(I1)*(P1+[0 959]));
-    P2=ceil(length(I1tmp)/length(I1)*(P2+[0 959]));
-    inbeth = (pos1>P1') & (pos1<P2');
-    ininbeth = inbeth(1,:) & inbeth(2,:);
-    pos1(:,ininbeth) = [];
-    pos2(:,ininbeth) = [];
-    I1_reshape( ininbeth, : ) = [];
-    I2_reshape( ininbeth, : ) = [];
-end
+% [heigth,width,~] = size(I1); 
+% CCCor=CCFind(I1(1:round(heigth/2),round(width/2):width,:));
+% if ~isempty(CCCor)
+%     M1=min(CCCor);
+%     M2=max(CCCor);
+%     P1=M1-0.5*[1/5 1/3].*(M2-M1);
+%     P2=M2+0.5*[1/5 1/3].*(M2-M1);
+%     P1=floor(length(I1tmp)/length(I1)*(P1+[0 959]));
+%     P2=ceil(length(I1tmp)/length(I1)*(P2+[0 959]));
+%     inbeth = (pos1>P1') & (pos1<P2');
+%     ininbeth = inbeth(1,:) & inbeth(2,:);
+%     pos1(:,ininbeth) = [];
+%     pos2(:,ininbeth) = [];
+%     I1_reshape( ininbeth, : ) = [];
+%     I2_reshape( ininbeth, : ) = [];
+% end
 % I1tmp = imfilter(I1tmp,ones(3,3)/9);
 % I2tmp = imfilter(I2tmp,ones(3,3)/9);
 % I1_reshape = impixel(I1tmp, pos1(2,:), pos1(1,:));
