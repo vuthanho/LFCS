@@ -7,7 +7,7 @@
 folder = strcat(pwd,'/../LFColorSample/take2_1');
 subdir = dir(folder);
 saved_data = '/saved_data/';
-output = '/output/PNG/spread_size50/';
+output = '/output/PNG/take2_1/';
 %% save outputs in a .mat file
 if isempty(dir(strcat(pwd,saved_data)))
     mkdir(pwd,saved_data);
@@ -29,7 +29,7 @@ coef.thInlrRatio = 0.05;
 %% Set up parameters for the algorithm
 options.save_file = save_file; % name of the folder to save results
 options.save_im   = save_im; % name of the folder to save images
-options.write     = 0; % 1 enables save image 
+options.write     = 1; % 1 enables save image 
 options.show      = 0; % 1 show / 0 not show
 options.exp0      = 29; % if exp0 < 0, the algorithm takes the middle exposure at the center
 options.clipping  = [15 240]; % min & max values for clipping e.g. [0 255]

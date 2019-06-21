@@ -11,7 +11,7 @@ function [X,C] = CCFind(I)
 % This code is copyrighted by PI Keigo Hirakawa. The softwares are for 
 % research use only. Use of software for commercial purposes without a 
 % prior agreement with the authors is strictly prohibited. We do not 
-% guarantee the code’s accuracy. We would appreciate if acknowledgments 
+% guarantee the codeï¿½s accuracy. We would appreciate if acknowledgments 
 % were made for the use of CCFind in your projects and publications.  
 % Please cite it as:
 %
