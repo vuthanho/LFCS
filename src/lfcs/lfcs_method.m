@@ -161,6 +161,8 @@ for i = center
         lut(lut<0) = 0;
         lut(lut>1.0) = 1.0;
         write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
+        struct_name = strcat(save_file,'lut',num2str(i), '.mat');
+        save(struct_name, 'lut', '-v7.3');
     end
     gamma = values{center(1)}.gamma(2);
 % % % %     gamma = values{i}.gamma(2);
@@ -250,6 +252,8 @@ for nbr = 1:nbrContours
             lut(lut<0) = 0;
             lut(lut>1.0) = 1.0;
             write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
+            struct_name = strcat(save_file,'lut',num2str(i), '.mat');
+            save(struct_name, 'lut', '-v7.3');
         end
 % % % %         gamma = values{i}.gamma(2);
         values{i}.I1exp0 = (values{i}.I1exp0).^(1/gamma);

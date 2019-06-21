@@ -147,7 +147,7 @@ disp(['    Gamma values: ', num2str(gammas(1)), ' & ', num2str(gammas(2)) ])
 
 %% Apply gamma and H transformation to full size (original) images
 %% Apply estimated gammas to the original images
-l=0.75^gammas(1);
+l=0.65^gammas(1);
 
 % % % gammaZZZ = interp1([0 l/2 l 1],[gammas(1) gammas(1) gammas(1) 1],mean(reshape(I1, [], 3),2),'pchip');
 I1(I1<0)=0;

@@ -4,7 +4,7 @@
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-folder = strcat(pwd,'/../LFColorSample/EXR/images');
+folder = strcat(pwd,'/../LFColorSample/take2_1');
 subdir = dir(folder);
 saved_data = '/saved_data/';
 output = '/output/PNG/spread_size50/';
