@@ -36,15 +36,12 @@ else
     I1_reshape = reshape(I1tmp, [], 3);
     I2_reshape = reshape(I2tmp, [], 3);
 end
-D = sqrt( (pos1(1,:)-pos2(1,:)).^2 + (pos1(2,:)-pos2(2,:)).^2 );
-D = abs(D - median(D));
-[~,index] = sort(D);
-perc_match = 0.9; % percentage of matches to keep around the median
-% of the distance between two correspondences
-I1_reshape = I1_reshape(index(1:floor(perc_match*length(index))),:);
-I2_reshape = I2_reshape(index(1:floor(perc_match*length(index))),:);
-pos1 = pos1(:,index(1:floor(perc_match*length(index))));
-pos2 = pos2(:,index(1:floor(perc_match*length(index))));
+% D = sqrt( (pos1(1,:)-pos2(1,:)).^2 + (pos1(2,:)-pos2(2,:)).^2 );
+% index = D>std(D);
+% I1_reshape = I1_reshape(~index,:);
+% I2_reshape = I2_reshape(~index,:);
+% pos1 = pos1(:,~index);
+% pos2 = pos2(:,~index);
 
 
 
@@ -57,8 +54,8 @@ I2_reshape( r_u1 | r_l1 | r_u2 | r_l2, : ) = [ ];
 pos1(:, r_u1 | r_l1 | r_u2 | r_l2 ) = [ ]; 
 pos2(:, r_u1 | r_l1 | r_u2 | r_l2 ) = [ ]; 
 
-[I1_reshape, ~] = clustering( I1_reshape, 5., -1e8 );
-[I2_reshape, ~] = clustering( I2_reshape, 5., -1e8 );
+[I1_reshape, ~] = clustering( I1_reshape, 2., -1e8 );
+[I2_reshape, ~] = clustering( I2_reshape, 2., -1e8 );
 
 count = 1;
 for i=1:size(I1_reshape, 1)
@@ -112,6 +109,7 @@ end
 
 %% Estimate gamma values and color correction matrix H
 disp '   Estimate gamma values and matrix H ----------------------------------------------'
+disp(['Number of correspondences : ',num2str(length(pos1(1,:)))]);
 % Initial guess for optimization step
 options = optimoptions('fmincon' ,'Algorithm','sqp', 'Display', 'off');
 Hl = -100.*ones(3); Hl(1,1) = 1e-4; Hl(2,2) = 1e-4; Hl(3,3) = 1e-4;
@@ -221,8 +219,8 @@ tmp0  = reshape(I1_c, [], 3);
 % I12(I12 < 0)    = 0;
 %%
 Id = mean(sum(H,2))*eye(3);
-RGB = tmp0>l;
-intensity = min(1,mean(tmp0,2)).*RGB(:,1).*RGB(:,2).*RGB(:,3);
+% RGB = tmp0>l;
+intensity = min(1,mean(tmp0,2));%.*RGB(:,1).*RGB(:,2).*RGB(:,3);
 % imshow(reshape(intensity,[1200 1920]))
 % drawnow
 HW=zeros(9,length(intensity));

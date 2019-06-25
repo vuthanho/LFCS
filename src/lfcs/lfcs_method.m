@@ -27,7 +27,6 @@ if nargin == 3
     hom       = options.homography;
     write     = options.write;
     spread    = options.spread;
-    prog      = options.prog;
     id_lut    = cell2mat(struct2cell(load(options.id_lut)));
     limit     = options.limit;
     if isempty(save_file)
@@ -103,11 +102,9 @@ for i=1:P
 end
 
 %% Initialize reference exposure image
-if prog
-    im_med_exp0 = ( double( imresize(im{exp0}, prog,'bilinear', 'Colormap', 'original') )./max_im );
-else
-    im_med_exp0 = ( double( imresize(im{exp0}, factor(2),'bilinear', 'Colormap', 'original') )./max_im );
-end
+
+im_med_exp0 = ( double( imresize(im{exp0}, factor(2),'bilinear', 'Colormap', 'original') )./max_im );
+
 
 %% Best gamma selection
 med_value = median( im_med_exp0(:) );
@@ -127,11 +124,9 @@ disp([' Gamma value ', num2str(gamma)])
 
 for i = center
     disp(['Calculating image ', num2str(i),' --> image ', num2str(exp0)  ])
-    if prog
-        im_med = ( double( imresize(im{i}, prog,'bilinear', 'Colormap', 'original') )./max_im );
-    else
-        im_med = ( double( imresize(im{i}, factor(2),'bilinear', 'Colormap', 'original') )./max_im );
-    end
+
+    im_med = ( double( imresize(im{i}, factor(2),'bilinear', 'Colormap', 'original') )./max_im );
+
 % % % %     gamma = -1;
     switch( hom )
         case 0
@@ -188,16 +183,8 @@ else
 end
 
 %% Whole calculation
-if nbrContours~=0
-    L_factor = interp1([0 nbrContours],[prog factor(2)],0:nbrContours);
-end
+
 for nbr = 1:nbrContours
-    if prog
-        factor(2) = L_factor(nbr+1);
-        if ~spread
-            im_med_exp0 = ( double( imresize(im{exp0}, factor(2),'bilinear', 'Colormap', 'original') )./max_im );
-        end
-    end
     if isPeven
         Contour = getContourE(p,nbr);
     else
@@ -205,7 +192,7 @@ for nbr = 1:nbrContours
     end
     for image = Contour
         i = image(1);
-        exp_neighbour = image(2);
+%         exp_neighbour = image(2);
        
       
         %% Initialize reference exposure image
@@ -219,7 +206,7 @@ for nbr = 1:nbrContours
                 if ~spread
                     values{i} = compute_colorstabilization( double( imresize(im{i},factor(1),'bilinear' , 'Colormap', 'original') )./max_im, ...
                     im_med, im_med_exp0,... %imresize(values{exp0}.I1exp0, factor(2),'bilinear', 'Colormap', 'original'),  ...
-                    coef, clip, gamma, use_sift,[]);%[values{exp_neighbour}.gamma(1) values{exp_neighbour}.H(:)'] );
+                    coef, clip, gamma, use_sift,[],limit);%[values{exp_neighbour}.gamma(1) values{exp_neighbour}.H(:)'] );
                 else
                     
 %                     values{i} = compute_colorstabilization( double( imresize(im{i},factor(1),'bilinear' , 'Colormap', 'original') )./max_im, ...
