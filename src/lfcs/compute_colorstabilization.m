@@ -221,9 +221,9 @@ tmp0  = reshape(I1_c, [], 3);
 Id = mean(sum(H,2))*eye(3);
 % RGB = tmp0>l;
 intensity = min(1,mean(tmp0,2));%.*RGB(:,1).*RGB(:,2).*RGB(:,3);
-intensity(intensity<l)=0;
-imshow(reshape(intensity,[1200 1920]))
-drawnow
+% intensity(intensity<l)=0;
+% imshow(reshape(intensity,[1200 1920]))
+% drawnow
 HW=zeros(9,length(intensity));
 if l<1
     for k = 1:9
@@ -232,6 +232,7 @@ if l<1
 else
     HW = repmat(H(:),[1 length(intensity)]);
 end
+
 I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(intensity)]),2))' , size(I1) );
 
 % % I12 = reshape( ( H * tmp0' )', size(I1) );

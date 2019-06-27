@@ -4,10 +4,10 @@
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-folder = strcat(pwd,'/../LFColorSample/quick_test');
+folder = strcat(pwd,'/../LFColorSample/take4_5');
 subdir = dir(folder);
-saved_data = '/saved_data/quick/';
-output = '/output/limit100/';
+saved_data = '/saved_data/take4_5/';
+output = '/output/take4_5/';
 %% save outputs in a .mat file
 if isempty(dir(strcat(pwd,saved_data)))
     mkdir(pwd,saved_data);
@@ -29,9 +29,9 @@ coef.thInlrRatio = 0.05;
 %% Set up parameters for the algorithm
 options.save_file = []; % name of the folder to save results
 options.save_im   = save_im; % name of the folder to save images
-options.write     = 1; % 1 enables save image 
+options.write     = 0; % 1 enables save image 
 options.show      = 0; % 1 show / 0 not show
-options.exp0      = 2; % if exp0 < 0, the algorithm takes the middle exposure at the center
+options.exp0      = 29; % if exp0 < 0, the algorithm takes the middle exposure at the center
 options.clipping  = [15 240]; % min & max values for clipping e.g. [0 255]
 options.factor    = [1 0.5]; % first value is for final result, second value for computational purposes.
 options.spread    = 1; % enables spreading references, 0 single ref at the center

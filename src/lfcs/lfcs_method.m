@@ -146,8 +146,9 @@ for i = center
     gamma = values{center(1)}.gamma(2);
     if to_save
         l=limit;
-        lut = id_lut .^ values{i}.gamma(1); 
-        Id = mean(sum(values{i}.H,2))*eye(3);
+        lut = id_lut .^ values{i}.gamma(1);
+        H = values{i}.H;
+        Id = mean(sum(H,2))*eye(3);
         RGB = lut>l;
         intensity = min(1,mean(lut,2)).*RGB(:,1).*RGB(:,2).*RGB(:,3);
         HW=zeros(9,length(intensity));
@@ -162,7 +163,10 @@ for i = center
         end
         lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
         lut(lut<0) = 0;
-        lut(lut>1.0) = 1.0;
+        if ~isempty(find(mean(lut,2)>1,1))
+            disp(strcat(num2str(i),' ###################################################'))
+        end
+%         lut(lut>1.0) = 1.0;
         write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
         struct_name = strcat(save_file,'lut',num2str(i), '.mat');
         save(struct_name, 'lut', '-v7.3');
@@ -236,9 +240,10 @@ for nbr = 1:nbrContours
         if to_save
             l=limit;
             lut = id_lut .^ values{i}.gamma(1); 
-            Id = mean(sum(values{i}.H,2))*eye(3);
-            RGB = lut>l;
-            intensity = min(1,mean(lut,2)).*RGB(:,1).*RGB(:,2).*RGB(:,3);
+            H = values{i}.H;
+            Id = mean(sum(H,2))*eye(3);
+%             RGB = lut>l;
+            intensity = min(1,mean(lut,2));%.*RGB(:,1).*RGB(:,2).*RGB(:,3);
             HW=zeros(9,length(intensity));
             if l<1
                 for k = 1:9
@@ -251,7 +256,10 @@ for nbr = 1:nbrContours
             end
             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
             lut(lut<0) = 0;
-            lut(lut>1.0) = 1.0;
+            if ~isempty(find(mean(lut,2)>1,1))
+                disp(strcat(num2str(i),' ###################################################'))
+            end
+%             lut(lut>1.0) = 1.0;
             write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
             struct_name = strcat(save_file,'lut',num2str(i), '.mat');
             save(struct_name, 'lut', '-v7.3');
