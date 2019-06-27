@@ -164,7 +164,7 @@ disp(['    Gamma values: ', num2str(gammas(1)), ' & ', num2str(gammas(2)) ])
 
 %% Apply gamma and H transformation to full size (original) images
 %% Apply estimated gammas to the original images
-l=limit^gammas(1);
+l=limit;
 
 % % % gammaZZZ = interp1([0 l/2 l 1],[gammas(1) gammas(1) gammas(1) 1],mean(reshape(I1, [], 3),2),'pchip');
 I1(I1<0)=0;
@@ -221,11 +221,16 @@ tmp0  = reshape(I1_c, [], 3);
 Id = mean(sum(H,2))*eye(3);
 % RGB = tmp0>l;
 intensity = min(1,mean(tmp0,2));%.*RGB(:,1).*RGB(:,2).*RGB(:,3);
-% imshow(reshape(intensity,[1200 1920]))
-% drawnow
+intensity(intensity<l)=0;
+imshow(reshape(intensity,[1200 1920]))
+drawnow
 HW=zeros(9,length(intensity));
-for k = 1:9
-    HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
+if l<1
+    for k = 1:9
+        HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
+    end
+else
+    HW = repmat(H(:),[1 length(intensity)]);
 end
 I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(intensity)]),2))' , size(I1) );
 
