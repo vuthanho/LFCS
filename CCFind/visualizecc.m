@@ -25,22 +25,22 @@ else
     
     %%%%%%%%%%%%%%%%%%%
     
-    C = analyzecc(X,I);%(I/max(I(:))).^(1/2.2));
-    C = C/max(C(:));
-    
-    figure;
-    c = ones(200,200,3);
-    for i=1:4
-        for j=1:6
-            n = i+(j-1)*4;
-            c(:,:,1)=C(1,n);
-            c(:,:,2)=C(2,n);
-            c(:,:,3)=C(3,n);
-            
-            subplot(4,6,n);
-            imshow(c);
-        end
-    end
+%     C = analyzecc(X,I);%(I/max(I(:))).^(1/2.2));
+%     C = C/max(C(:));
+%     
+%     figure;
+%     c = ones(200,200,3);
+%     for i=1:4
+%         for j=1:6
+%             n = i+(j-1)*4;
+%             c(:,:,1)=C(1,n);
+%             c(:,:,2)=C(2,n);
+%             c(:,:,3)=C(3,n);
+%             
+%             subplot(4,6,n);
+%             imshow(c);
+%         end
+%     end
     
     
 end

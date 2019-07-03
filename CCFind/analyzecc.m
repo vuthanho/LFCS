@@ -14,14 +14,14 @@ else
     
     % grab colors
     C = zeros(size(I,3),24);
+    marge = 2;
     for n=1:24
         M = zeros(size(I,1),size(I,2));
-        M(X(n,1)+DX(1)+DY(1),X(n,2)+DX(2)+DY(2)) = 1;
-        M(X(n,1)+DX(1)-DY(1),X(n,2)+DX(2)-DY(2)) = 1;
-        M(X(n,1)-DX(1)+DY(1),X(n,2)-DX(2)+DY(2)) = 1;
-        M(X(n,1)-DX(1)-DY(1),X(n,2)-DX(2)-DY(2)) = 1;
+        M(X(n,1)+DX(1)+DY(1)-marge,X(n,2)+DX(2)+DY(2)-marge) = 1; % SE
+        M(X(n,1)+DX(1)-DY(1)+marge,X(n,2)+DX(2)-DY(2)-marge) = 1; % NE
+        M(X(n,1)-DX(1)+DY(1)-marge,X(n,2)-DX(2)+DY(2)+marge) = 1; % SW
+        M(X(n,1)-DX(1)-DY(1)+marge,X(n,2)-DX(2)-DY(2)+marge) = 1; % NW
         H = bwconvhull(M);
-        
         for c=1:size(I,3)
             C(c,n) = sum(sum(I(:,:,c).*H))/sum(H(:));
         end

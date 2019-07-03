@@ -163,10 +163,10 @@ for i = center
         end
         lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
         lut(lut<0) = 0;
-        if ~isempty(find(mean(lut,2)>1,1))
-            disp(strcat(num2str(i),' ###################################################'))
-        end
-%         lut(lut>1.0) = 1.0;
+%         if ~isempty(find(mean(lut,2)>1,1))
+%             disp(strcat(num2str(i),' ###################################################'))
+%         end
+        lut(lut>1.0) = 1.0;
         write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
         struct_name = strcat(save_file,'lut',num2str(i), '.mat');
         save(struct_name, 'lut', '-v7.3');
@@ -256,10 +256,10 @@ for nbr = 1:nbrContours
             end
             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
             lut(lut<0) = 0;
-            if ~isempty(find(mean(lut,2)>1,1))
-                disp(strcat(num2str(i),' ###################################################'))
-            end
-%             lut(lut>1.0) = 1.0;
+%             if ~isempty(find(mean(lut,2)>1,1))
+%                 disp(strcat(num2str(i),' ###################################################'))
+%             end
+            lut(lut>1.0) = 1.0;
             write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
             struct_name = strcat(save_file,'lut',num2str(i), '.mat');
             save(struct_name, 'lut', '-v7.3');
@@ -283,8 +283,8 @@ end
 
 if write
     for i = 1:size(values,2)
-    filename = strcat(save_im,num2str(i),'.png');
-    imwrite(values{i}.I1exp0,filename);
+    filename = strcat(save_im,num2str(i),'.exr');
+    exrwrite(values{i}.I1exp0,filename);
     end
 end
 

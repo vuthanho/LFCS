@@ -118,7 +118,7 @@ end
 
 if max(s1,s2)<0
   X=[];
-  disp(['CCFind ERROR: Could not find a match.\n']);
+  disp('CCFind ERROR: Could not find a match.');
   return;
 end
 
