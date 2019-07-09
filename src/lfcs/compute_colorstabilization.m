@@ -51,8 +51,10 @@ end
 
 I1_reshape( r_u1 | r_l1 | r_u2 | r_l2, : ) = [ ]; 
 I2_reshape( r_u1 | r_l1 | r_u2 | r_l2, : ) = [ ]; 
-pos1(:, r_u1 | r_l1 | r_u2 | r_l2 ) = [ ]; 
-pos2(:, r_u1 | r_l1 | r_u2 | r_l2 ) = [ ]; 
+if use_sift(1)
+    pos1(:, r_u1 | r_l1 | r_u2 | r_l2 ) = [ ]; 
+    pos2(:, r_u1 | r_l1 | r_u2 | r_l2 ) = [ ]; 
+end
 
 [I1_reshape, ~] = clustering( I1_reshape, 2., -1e8 );
 [I2_reshape, ~] = clustering( I2_reshape, 2., -1e8 );
@@ -69,8 +71,10 @@ end
 if( exist('v','var') )
     I1_reshape( v, : ) = [];
     I2_reshape( v, : ) = [];
-    pos1(:,v) = [];
-    pos2(:,v) = [];
+    if use_sift(1)
+        pos1(:,v) = [];
+        pos2(:,v) = [];
+    end
 end
 
 %% removes the correspondences in the MacBeth Color Checker to prove that the algorithm works without it
@@ -96,20 +100,24 @@ end
 % I1_reshape = impixel(I1tmp, pos1(2,:), pos1(1,:));
 % I2_reshape = impixel(I2tmp, pos2(2,:), pos2(1,:));
 
-% subplot (1,2,1);
-% imshow ((I1tmp./max(I1tmp(:))));
-% hold on;
-% plot (pos1(2,:), pos1(1,:), 'b*');
+% if use_sift(1)
+%     subplot (1,2,1);
+%     imshow ((I1tmp./max(I1tmp(:))));
+%     hold on;
+%     plot (pos1(2,:), pos1(1,:), 'b*');
 % 
-% subplot (1,2,2);
-% imshow ((I2tmp./max(I2tmp(:))));
-% hold on;
-% plot (pos2(2,:), pos2(1,:), 'r*');
-% drawnow
+%     subplot (1,2,2);
+%     imshow ((I2tmp./max(I2tmp(:))));
+%     hold on;
+%     plot (pos2(2,:), pos2(1,:), 'r*');
+%     drawnow
+% end
 
 %% Estimate gamma values and color correction matrix H
-disp '   Estimate gamma values and matrix H ----------------------------------------------'
-disp(['Number of correspondences : ',num2str(length(pos1(1,:)))]);
+% disp '   Estimate gamma values and matrix H ----------------------------------------------'
+% if use_sift(1)
+%     disp(['Number of correspondences : ',num2str(length(pos1(1,:)))]);
+% end
 % Initial guess for optimization step
 options = optimoptions('fmincon' ,'Algorithm','sqp', 'Display', 'off');
 Hl = -100.*ones(3); Hl(1,1) = 1e-4; Hl(2,2) = 1e-4; Hl(3,3) = 1e-4;
@@ -139,12 +147,12 @@ if fval1 > fval2
     gammas = gammas2;
     H = inv(reshape(gammas2(3:end), 3 , 3)'); 
     iter = 2;
-    disp(['Error : ',num2str(fval2)]);
+%     disp(['Error : ',num2str(fval2)]);
 else
     gammas = gammas1;
     H = reshape(gammas1(3:end), 3 , 3)';
     iter = 1;
-    disp(['Error : ',num2str(fval1)]);
+%     disp(['Error : ',num2str(fval1)]);
 end
 %% Check that color correction matrix is well computed
 if( H(1, 1) < 0 || H(2, 2) < 0 || H(3, 3) < 0 )
@@ -157,9 +165,9 @@ if( H(1, 1) < 0 || H(2, 2) < 0 || H(3, 3) < 0 )
         H = zeros(3,3);
     end
 end
-disp('    H matrix: ' );disp(H)
+% disp('    H matrix: ' );disp(H)
 
-disp(['    Gamma values: ', num2str(gammas(1)), ' & ', num2str(gammas(2)) ])
+% disp(['    Gamma values: ', num2str(gammas(1)), ' & ', num2str(gammas(2)) ])
 % disp('    H matrix ransac: ' );disp(H) % no ransac is used for now
 
 %% Apply gamma and H transformation to full size (original) images
@@ -218,7 +226,7 @@ tmp0  = reshape(I1_c, [], 3);
 % I12 = reshape( I12tmp, size(I1) );
 % I12(I12 < 0)    = 0;
 %%
-Id = mean(sum(H,2))*eye(3);
+Id = diag( [ max(max(I1tmp(:,:,1))) max(max(I1tmp(:,:,2))) max(max(I1tmp(:,:,3))) ] );
 % RGB = tmp0>l;
 intensity = min(1,mean(tmp0,2));%.*RGB(:,1).*RGB(:,2).*RGB(:,3);
 % intensity(intensity<l)=0;

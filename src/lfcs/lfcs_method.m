@@ -1,12 +1,11 @@
-function [] = lfcs_method( folder, coef, options )
+function [] = lfcs_method( folder, options )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% Calculate color stabilized images of the lightfield array
 %% Set a reference and estimate gamma and color
 %%
 %% Inputs:  1. folder  -> char name of the folder where LF array is
-%%          2. coef    -> struct for RANSAC parameters, (not used for now)
-%%          3. options -> struct containing save_file/show/exp0/clipping
+%%          2. options -> struct containing save_file/show/exp0/clipping
 %%                               factor/sift/dense
 %%
 %% Outputs: 1. None
@@ -19,7 +18,6 @@ if nargin == 3
     %% Set up parameters for the algorithm
     save_file = options.save_file;
     save_im   = options.save_im;
-    show      = options.show;
     exp0      = options.exp0;
     clipping  = options.clipping;
     factor    = options.factor;
@@ -41,7 +39,6 @@ if nargin < 3
     %% Set up parameters for the algorithm
     save_file = [];
     to_save   = 0;
-    show      = 0;
     clipping  = [0 255];
     factor    = [1 .25];
     use_sift  = [0 0];
