@@ -1,4 +1,4 @@
-function values = compute_colorstabilization( I1, I1tmp, I2tmp, coef, clip_v, gamma_ref, use_sift, ref_ref, limit )
+function values = compute_colorstabilization( I1, I1tmp, I2tmp, clip_v, gamma_ref, use_sift, ref_ref, limit )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% Color matrix and gamma estimation given two image filename
@@ -21,11 +21,6 @@ function values = compute_colorstabilization( I1, I1tmp, I2tmp, coef, clip_v, ga
 %%                                           color stabilization)
 %%                                    -clipping (new clipping range min and max)
 %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Check input values
-if nargin < 7
-    show = 0;
-end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% If SIFT, calculate correspondences using SIFT, otherwise consider 
@@ -172,7 +167,8 @@ end
 
 %% Apply gamma and H transformation to full size (original) images
 %% Apply estimated gammas to the original images
-l=limit;
+l=max(I1_reshape(:))^gammas(2);
+disp(['Limit is ',num2str(l)])
 
 % % % gammaZZZ = interp1([0 l/2 l 1],[gammas(1) gammas(1) gammas(1) 1],mean(reshape(I1, [], 3),2),'pchip');
 I1(I1<0)=0;
@@ -226,26 +222,28 @@ tmp0  = reshape(I1_c, [], 3);
 % I12 = reshape( I12tmp, size(I1) );
 % I12(I12 < 0)    = 0;
 %%
-Id = diag( [ max(max(I1tmp(:,:,1))) max(max(I1tmp(:,:,2))) max(max(I1tmp(:,:,3))) ] );
-% RGB = tmp0>l;
-intensity = min(1,mean(tmp0,2));%.*RGB(:,1).*RGB(:,2).*RGB(:,3);
+Id = diag( [ max(max(I2tmp(:,:,1)))/max(max(I1tmp(:,:,1))) ...
+             max(max(I2tmp(:,:,2)))/max(max(I1tmp(:,:,2))) ...
+             max(max(I2tmp(:,:,3)))/max(max(I1tmp(:,:,3))) ] );
+RGB = tmp0>l;
+intensity = mean(tmp0,2).*RGB(:,1).*RGB(:,2).*RGB(:,3);
 % intensity(intensity<l)=0;
 % imshow(reshape(intensity,[1200 1920]))
 % drawnow
-HW=zeros(9,length(intensity));
+
 if l<1
+    HW=zeros(9,length(intensity));
     for k = 1:9
         HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
     end
+    I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(intensity)]),2))' , size(I1) );
 else
-    HW = repmat(H(:),[1 length(intensity)]);
+    I12 = reshape( ( H * tmp0' )', size(I1) );
 end
 
-I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(intensity)]),2))' , size(I1) );
-
-% % I12 = reshape( ( H * tmp0' )', size(I1) );
 I12(I12 < 0)    = 0;
-% I12((I12.*reshape(intensity,[1200 1920]))>0) = 1;
+I12(I12 > 1)    = 1;
+
 
 %% Define mask
 % [r_l1tmp, r_u1tmp] = discard_saturated( reshape(I1, [], 3), clip_v );
