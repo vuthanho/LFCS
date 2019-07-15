@@ -167,8 +167,7 @@ end
 
 %% Apply gamma and H transformation to full size (original) images
 %% Apply estimated gammas to the original images
-l=max(I1_reshape(:))^gammas(2);
-disp(['Limit is ',num2str(l)])
+l=limit^gammas(2);
 
 % % % gammaZZZ = interp1([0 l/2 l 1],[gammas(1) gammas(1) gammas(1) 1],mean(reshape(I1, [], 3),2),'pchip');
 I1(I1<0)=0;
@@ -221,7 +220,8 @@ tmp0  = reshape(I1_c, [], 3);
 % I12tmp = W.*I12tmp + mean(max(I12tmp))/mean(max(tmp0))*(1-W).*tmp0;
 % I12 = reshape( I12tmp, size(I1) );
 % I12(I12 < 0)    = 0;
-%%
+%% Interpolation of the Homography
+
 Id = diag( [ max(max(I2tmp(:,:,1)))/max(max(I1tmp(:,:,1))) ...
              max(max(I2tmp(:,:,2)))/max(max(I1tmp(:,:,2))) ...
              max(max(I2tmp(:,:,3)))/max(max(I1tmp(:,:,3))) ] );
@@ -244,6 +244,25 @@ end
 I12(I12 < 0)    = 0;
 I12(I12 > 1)    = 1;
 
+%% Interpolation of saturated pixels to bring them back in the color space
+
+% I12 = ( H * tmp0' )' ;
+% 
+% saturind = I12 > 1;
+% saturind = saturind(:,1)|saturind(:,2)|saturind(:,3);
+% HoneLAB = rgb2lab((H * ones(3,1))');
+% I12LAB = rgb2lab(I12);
+% I12LAB(saturind,1) = interp1([min(unique(I12LAB(~saturind,1)')) max(unique(I12LAB(~saturind,1)')) HoneLAB(1)],[min(unique(I12LAB(~saturind,1)')) max(unique(I12LAB(~saturind,1)')) 100],I12LAB(saturind,1)');
+% I12LAB(saturind,2) = interp1([min(unique(I12LAB(~saturind,2)')) max(unique(I12LAB(~saturind,2)')) HoneLAB(2)],[min(unique(I12LAB(~saturind,2)')) max(unique(I12LAB(~saturind,2)'))   0],I12LAB(saturind,2)');
+% I12LAB(saturind,3) = interp1([min(unique(I12LAB(~saturind,3)')) max(unique(I12LAB(~saturind,3)')) HoneLAB(3)],[min(unique(I12LAB(~saturind,3)')) max(unique(I12LAB(~saturind,3)'))   0],I12LAB(saturind,3)');
+% I12 = lab2rgb(I12LAB);
+% figure
+% imshow(reshape(I12,size(I1)))
+
+%% Detection of the OER
+
+% tmpLAB = rgb2lab(tmp0);
+% OER = 1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2)));
 
 %% Define mask
 % [r_l1tmp, r_u1tmp] = discard_saturated( reshape(I1, [], 3), clip_v );

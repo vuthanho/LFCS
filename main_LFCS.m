@@ -21,7 +21,7 @@ end
 save_im = strcat(pwd,output);
 
 %% Set up parameters for the algorithm
-options.save_file = []; % name of the folder to save results
+options.save_file = save_file; % name of the folder to save results
 options.save_im   = save_im; % name of the folder to save images
 options.exp0      = -1; % if exp0 < 0, the algorithm takes the middle exposure at the center
 options.clipping  = [15 240]; % min & max values for clipping e.g. [0 255]
