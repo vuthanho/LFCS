@@ -222,27 +222,27 @@ tmp0  = reshape(I1_c, [], 3);
 % I12(I12 < 0)    = 0;
 %% Interpolation of the Homography
 
-Id = diag( [ max(max(I2tmp(:,:,1)))/max(max(I1tmp(:,:,1))) ...
-             max(max(I2tmp(:,:,2)))/max(max(I1tmp(:,:,2))) ...
-             max(max(I2tmp(:,:,3)))/max(max(I1tmp(:,:,3))) ] );
-RGB = tmp0>l;
-intensity = mean(tmp0,2).*RGB(:,1).*RGB(:,2).*RGB(:,3);
-% intensity(intensity<l)=0;
-% imshow(reshape(intensity,[1200 1920]))
-% drawnow
-
-if l<1
-    HW=zeros(9,length(intensity));
-    for k = 1:9
-        HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
-    end
-    I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(intensity)]),2))' , size(I1) );
-else
-    I12 = reshape( ( H * tmp0' )', size(I1) );
-end
-
-I12(I12 < 0)    = 0;
-I12(I12 > 1)    = 1;
+% Id = diag( [ max(max(I2tmp(:,:,1)))/max(max(I1tmp(:,:,1))) ...
+%              max(max(I2tmp(:,:,2)))/max(max(I1tmp(:,:,2))) ...
+%              max(max(I2tmp(:,:,3)))/max(max(I1tmp(:,:,3))) ] );
+% RGB = tmp0>l;
+% intensity = mean(tmp0,2).*RGB(:,1).*RGB(:,2).*RGB(:,3);
+% % intensity(intensity<l)=0;
+% % imshow(reshape(intensity,[1200 1920]))
+% % drawnow
+% 
+% if l<1
+%     HW=zeros(9,length(intensity));
+%     for k = 1:9
+%         HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
+%     end
+%     I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(intensity)]),2))' , size(I1) );
+% else
+%     I12 = reshape( ( H * tmp0' )', size(I1) );
+% end
+% 
+% I12(I12 < 0)    = 0;
+% I12(I12 > 1)    = 1;
 
 %% Interpolation of saturated pixels to bring them back in the color space
 
@@ -261,9 +261,26 @@ I12(I12 > 1)    = 1;
 
 %% Detection of the OER
 
-% tmpLAB = rgb2lab(tmp0);
-% OER = 1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2)));
-
+% I12tmp = ( H * tmp0' )' ;
+% I12tmp = (1-OER).*I12tmp + mean(max(I12tmp))/mean(max(tmp0))*OER.*tmp0;
+Id = diag( [ max(max(I2tmp(:,:,1)))/max(max(I1tmp(:,:,1))) ...
+             max(max(I2tmp(:,:,2)))/max(max(I1tmp(:,:,2))) ...
+             max(max(I2tmp(:,:,3)))/max(max(I1tmp(:,:,3))) ] );
+if l<1
+    tmpLAB = rgb2lab(tmp0);
+    OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
+    OER((OER-l)<=0)=0;
+    OER = 1/(max(max(OER)))*OER;
+    HW=zeros(9,length(OER));
+    for k = 1:9
+        HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
+    end
+    I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(OER)]),2))' , size(I1) );
+else
+    I12 = reshape( ( H * tmp0' )', size(I1) );
+end
+I12(I12 < 0)    = 0;
+I12(I12 > 1)    = 1;
 %% Define mask
 % [r_l1tmp, r_u1tmp] = discard_saturated( reshape(I1, [], 3), clip_v );
 % 

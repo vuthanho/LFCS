@@ -161,21 +161,40 @@ for i = center
     if to_save
         lut = id_lut .^ values{i}.gamma(1);
         H = values{i}.H;
+        limit=l^values{i}.gamma(2);
+% %         Interpolation method
+%         Id = diag( [ max(max(im_med_exp0(:,:,1)))/max(lut(:,1)) max(max(im_med_exp0(:,:,2)))/max(lut(:,2)) max(max(im_med_exp0(:,:,3)))/max(lut(:,3)) ] );
+%         RGB = lut>limit;
+%         intensity = min(1,mean(lut,2)).*RGB(:,1).*RGB(:,2).*RGB(:,3);
+%         
+%         if limit<1
+%             HW=zeros(9,length(intensity));
+%             for k = 1:9
+%                 HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
+%             end
+%             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
+%         else
+%             lut = ( H * lut' )';
+%         end     
+
+% %         Detection of overexposured region
+
         Id = diag( [ max(max(im_med_exp0(:,:,1)))/max(lut(:,1)) max(max(im_med_exp0(:,:,2)))/max(lut(:,2)) max(max(im_med_exp0(:,:,3)))/max(lut(:,3)) ] );
-        RGB = lut>l;
-        intensity = min(1,mean(lut,2)).*RGB(:,1).*RGB(:,2).*RGB(:,3);
-        
-        if l<1
-            HW=zeros(9,length(intensity));
+        if limit<1
+            tmpLAB = rgb2lab(lut);
+            OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
+            OER((OER-limit)<=0)=0;
+            OER = 1/(max(max(OER)))*OER;
+            HW=zeros(9,length(OER));
             for k = 1:9
-                HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
+                HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
             end
-            lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
+            lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
         else
             lut = ( H * lut' )';
-        end     
-        lut(lut<0) = 0;
-        lut(lut>1.0) = 1.0;
+        end
+        lut(lut < 0)    = 0;
+        lut(lut > 1)    = 1;
         lut = lut.^(1/values{i}.gamma(2));
         write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
 %         struct_name = strcat(save_file,'lut',num2str(i), '.mat');
@@ -216,7 +235,6 @@ for nbr = 1:nbrContours
         im_med = ( double( imresize(im{i}, factor(2),'bilinear', 'Colormap', 'original') )./max_im );
 
         %% Calculation
-
         if ~spread
             disp(['Calculating image ', num2str(i),' --> image ', num2str(exp0)  ])
             values{i} = compute_colorstabilization( double( imresize(im{i},factor(1),'bilinear' , 'Colormap', 'original') )./max_im, ...
@@ -232,25 +250,47 @@ for nbr = 1:nbrContours
 %     Saving the LUT
         if to_save
             lut = id_lut .^ values{i}.gamma(1);
-            H = values{i}.H;
+            H = values{i}.H;        
+            limit=l^values{i}.gamma(2);
+% %             Interpolation method
+% 
+%             Id = diag( [ max(max(values{image(2)}.I1exp0(:,:,1)))/max(lut(:,1)) ...
+%                          max(max(values{image(2)}.I1exp0(:,:,2)))/max(lut(:,2)) ...
+%                          max(max(values{image(2)}.I1exp0(:,:,3)))/max(lut(:,3)) ] );
+%             RGB = lut>l;
+%             intensity = min(1,mean(lut,2)).*RGB(:,1).*RGB(:,2).*RGB(:,3);
+%             HW=zeros(9,length(intensity));
+%             if l<1
+%             for k = 1:9
+%                 HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
+%             end
+%             else
+%                 for k = 1:9
+%                     HW(k,:)=interp1([0 0.5 0.99 l],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
+%                 end
+%             end
+%             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
+
+% %             Detection of OER
+
             Id = diag( [ max(max(values{image(2)}.I1exp0(:,:,1)))/max(lut(:,1)) ...
                          max(max(values{image(2)}.I1exp0(:,:,2)))/max(lut(:,2)) ...
                          max(max(values{image(2)}.I1exp0(:,:,3)))/max(lut(:,3)) ] );
-            RGB = lut>l;
-            intensity = min(1,mean(lut,2)).*RGB(:,1).*RGB(:,2).*RGB(:,3);
-            HW=zeros(9,length(intensity));
-            if l<1
-            for k = 1:9
-                HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
-            end
-            else
+            if limit<1
+                tmpLAB = rgb2lab(lut);
+                OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
+                OER((OER-limit)<=0)=0;
+                OER = 1/(max(max(OER)))*OER;
+                HW=zeros(9,length(OER));
                 for k = 1:9
-                    HW(k,:)=interp1([0 0.5 0.99 l],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
+                    HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
                 end
+                lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
+            else
+                lut = ( H * lut' )';
             end
-            lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
-            lut(lut<0) = 0;
-            lut(lut>1.0) = 1.0;
+            lut(lut < 0)    = 0;
+            lut(lut > 1)    = 1;
             lut = lut.^(1/values{i}.gamma(2));
             write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
 %             struct_name = strcat(save_file,'lut',num2str(i), '.mat');
