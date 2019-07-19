@@ -18,8 +18,9 @@ if nargin == 2
     
     if isa(options,'char') % If the algorithm is compiled as an executable
         indpar = find(options==',');
-        indpar = (indpar(1));
-        options = strcat(options(1),'''',options(2:(indpar-1)),'''',options(indpar:end));
+        options = strcat(options(1),'''',options(2:(indpar(1)-1)),'''',... % save_file
+                    options(indpar(1)),'''',options((indpar(1)+1):(indpar(2)-1)),'''',... % save_im
+                    options(indpar(2):end));
         options = eval(options);
         save_file = options{1};
         save_im   = options{2};
@@ -316,8 +317,8 @@ if write
         mkdir(save_im);
     end
     for i = 1:size(values,2)
-    filename = strcat(save_im,num2str(i),'.png');
-    imwrite(values{i}.I1exp0,filename);
+    filename = strcat(save_im,num2str(i),'.exr');
+   exrwrite(values{i}.I1exp0,filename);
     end
 end
 
