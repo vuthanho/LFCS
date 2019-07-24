@@ -10,10 +10,11 @@ function images = read_images( folder )
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 dcm = dir(folder);
-
-for i = 3:size(dcm,1)
+names = natsort({dcm(3:end).name});
+images = cell(1,64);
+for i = 1:size(names,2)
         
-    filename = strcat(folder,dcm(i).name);
+    filename = strcat(folder,names{i});
     if (strcmp(filename(end-2:end),'exr'))
         im = exrread(filename);
         im = uint8(im.*255);
@@ -21,6 +22,6 @@ for i = 3:size(dcm,1)
         im = imread(filename);
     end
     
-    images{i-2} = im;
+    images{i} = im;
 
 end

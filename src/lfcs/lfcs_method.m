@@ -98,6 +98,7 @@ end
 %% Read images and exposures
 disp 'Reading images ...'
 im = read_images( folder );
+% imnc = read_images( '/home/bonnetvalentin/Documents/LFCS/LFColorSample/take4_5/' ); %% Only to apply the results of the cropped color checker to non cropped views
 
 P = length(im); % number of photos
 p = sqrt(P);
@@ -163,20 +164,6 @@ for i = center
         lut = id_lut .^ values{i}.gamma(1);
         H = values{i}.H;
         limit=l^values{i}.gamma(2);
-% %         Interpolation method
-%         Id = diag( [ max(max(im_med_exp0(:,:,1)))/max(lut(:,1)) max(max(im_med_exp0(:,:,2)))/max(lut(:,2)) max(max(im_med_exp0(:,:,3)))/max(lut(:,3)) ] );
-%         RGB = lut>limit;
-%         intensity = min(1,mean(lut,2)).*RGB(:,1).*RGB(:,2).*RGB(:,3);
-%         
-%         if limit<1
-%             HW=zeros(9,length(intensity));
-%             for k = 1:9
-%                 HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
-%             end
-%             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
-%         else
-%             lut = ( H * lut' )';
-%         end     
 
 % %         Detection of overexposured region
 
@@ -185,7 +172,7 @@ for i = center
             tmpLAB = rgb2lab(lut);
             OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
             OER((OER-limit)<=0)=0;
-            OER = 1/(max(max(OER)))*OER;
+            OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
             HW=zeros(9,length(OER));
             for k = 1:9
                 HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
@@ -198,10 +185,37 @@ for i = center
         lut(lut > 1)    = 1;
         lut = lut.^(1/values{i}.gamma(2));
         write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
-%         struct_name = strcat(save_file,'lut',num2str(i), '.mat');
-%         save(struct_name, 'lut', '-v7.3');
+        struct_name = strcat(save_file,'lut',num2str(i), '.mat');
+        save(struct_name, 'lut', '-v7.3');
     end 
 
+% %     Only to apply the results of the cropped color checker to non
+%       cropped views
+%     H = values{i}.H;
+%     limit=l^values{i}.gamma(2);
+%     lut = reshape(im2double(imnc{i}), [], 3);
+%     Id = diag( [ max(max(im_med_exp0(:,:,1)))/max(lut(:,1)) max(max(im_med_exp0(:,:,2)))/max(lut(:,2)) max(max(im_med_exp0(:,:,3)))/max(lut(:,3)) ] );
+%     if limit<1
+%         tmpLAB = rgb2lab(lut);
+%         OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
+%         OER((OER-limit)<=0)=0;
+%         OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
+%         HW=zeros(9,length(OER));
+%         for k = 1:9
+%             HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
+%         end
+%         lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
+%     else
+%         lut = ( H * lut' )';
+%     end
+%     lut(lut < 0)    = 0;
+%     lut(lut > 1)    = 1;
+%     lut = lut.^(1/values{i}.gamma(2));
+%     lut = reshape(lut,size(imnc{i}));
+%     filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
+%     exrwrite(lut,filename);
+
+    
     %% Define the limit ranges for the weighting function
     clip_vR(i,:) = [ values{i}.min_clip(1) values{i}.max_clip(1)];
     clip_vG(i,:) = [ values{i}.min_clip(2) values{i}.max_clip(2)];
@@ -253,24 +267,6 @@ for nbr = 1:nbrContours
             lut = id_lut .^ values{i}.gamma(1);
             H = values{i}.H;        
             limit=l^values{i}.gamma(2);
-% %             Interpolation method
-% 
-%             Id = diag( [ max(max(values{image(2)}.I1exp0(:,:,1)))/max(lut(:,1)) ...
-%                          max(max(values{image(2)}.I1exp0(:,:,2)))/max(lut(:,2)) ...
-%                          max(max(values{image(2)}.I1exp0(:,:,3)))/max(lut(:,3)) ] );
-%             RGB = lut>l;
-%             intensity = min(1,mean(lut,2)).*RGB(:,1).*RGB(:,2).*RGB(:,3);
-%             HW=zeros(9,length(intensity));
-%             if l<1
-%             for k = 1:9
-%                 HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
-%             end
-%             else
-%                 for k = 1:9
-%                     HW(k,:)=interp1([0 0.5 0.99 l],[H(k) H(k) H(k) Id(k)],intensity,'pchip');
-%                 end
-%             end
-%             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(intensity)]),2))' , size(lut) );
 
 % %             Detection of OER
 
@@ -281,7 +277,7 @@ for nbr = 1:nbrContours
                 tmpLAB = rgb2lab(lut);
                 OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
                 OER((OER-limit)<=0)=0;
-                OER = 1/(max(max(OER)))*OER;
+                OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
                 HW=zeros(9,length(OER));
                 for k = 1:9
                     HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
@@ -294,9 +290,36 @@ for nbr = 1:nbrContours
             lut(lut > 1)    = 1;
             lut = lut.^(1/values{i}.gamma(2));
             write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
-%             struct_name = strcat(save_file,'lut',num2str(i), '.mat');
-%             save(struct_name, 'lut', '-v7.3');
-        end 
+            struct_name = strcat(save_file,'lut',num2str(i), '.mat');
+            save(struct_name, 'lut', '-v7.3');
+        end
+        
+% %     Only to apply the results of the cropped color checker to non
+%       cropped views
+%         H = values{i}.H;
+%         limit=l^values{i}.gamma(2);
+%         lut = reshape(im2double(imnc{i}), [], 3);
+%         Id = diag( [ max(max(im_med_exp0(:,:,1)))/max(lut(:,1)) max(max(im_med_exp0(:,:,2)))/max(lut(:,2)) max(max(im_med_exp0(:,:,3)))/max(lut(:,3)) ] );
+%         if limit<1
+%             tmpLAB = rgb2lab(lut);
+%             OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
+%             OER((OER-limit)<=0)=0;
+%             OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
+%             HW=zeros(9,length(OER));
+%             for k = 1:9
+%                 HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
+%             end
+%             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
+%         else
+%             lut = ( H * lut' )';
+%         end
+%         lut(lut < 0)    = 0;
+%         lut(lut > 1)    = 1;
+%         lut = lut.^(1/values{i}.gamma(2));
+%         lut = reshape(lut,size(imnc{i}));
+%         filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
+%         exrwrite(lut,filename);
+        
         %% Define the limit ranges for the weighting function
         clip_vR(i,:) = [ values{i}.min_clip(1) values{i}.max_clip(1)];
         clip_vG(i,:) = [ values{i}.min_clip(2) values{i}.max_clip(2)];
@@ -317,8 +340,8 @@ if write
         mkdir(save_im);
     end
     for i = 1:size(values,2)
-    filename = strcat(save_im,num2str(i),'.exr');
-   exrwrite(values{i}.I1exp0,filename);
+    filename = strcat(save_im,num2str(i),'.png');
+   imwrite(values{i}.I1exp0,filename);
     end
 end
 

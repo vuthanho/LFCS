@@ -270,7 +270,7 @@ if l<1
     tmpLAB = rgb2lab(tmp0);
     OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
     OER((OER-l)<=0)=0;
-    OER = 1/(max(max(OER)))*OER;
+    OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
     HW=zeros(9,length(OER));
     for k = 1:9
         HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');

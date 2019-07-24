@@ -4,10 +4,10 @@
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-folder = strcat(pwd,'/../LFColorSample/take4_5');
+folder = strcat(pwd,'/../LFColorSample/cropped_take4_5/EXR');
 subdir = dir(folder);
-saved_data = '/saved_data/OER/';
-output = '/output/OER/';
+saved_data = '/saved_data/cropped20/';
+output = '/output/cropped20/';
 %% save outputs in a .mat file
 if isempty(dir(strcat(pwd,saved_data)))
     mkdir(pwd,saved_data);
@@ -21,11 +21,11 @@ end
 save_im = strcat(pwd,output);
 
 %% Set up parameters for the algorithm
-options.save_file = save_file; % name of the folder to save results
+options.save_file = []; % name of the folder to save results
 options.save_im   = []; % name of the folder to save images
 options.exp0      = -1; % if exp0 < 0, the algorithm takes the middle exposure at the center
 options.clipping  = [15 240]; % min & max values for clipping e.g. [0 255]
-options.factor    = [1 0.5]; % first value is for final result, second value for computational purposes.
+options.factor    = [1 sqrt(1)]; % first value is for final result, second value for computational purposes.
 options.spread    = 1; % enables spreading references, 0 single ref at the center
 options.sift      = 1; 
 options.dense     = 0;
