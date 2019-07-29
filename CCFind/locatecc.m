@@ -28,7 +28,7 @@ T = resort(T,ind); % sort in the same order as D
 
 if length(x)<18
     X=[];
-    disp(['CCFind ERROR: Could not find recurring shapes.\n']);
+%     disp(['CCFind ERROR: Could not find recurring shapes.\n']);
     return;
 end
 [~,C]=sort(sum(D(2:6,:),1));% closest 3 neighbors
@@ -118,7 +118,7 @@ end
 
 if max(s1,s2)<0
   X=[];
-  disp('CCFind ERROR: Could not find a match.');
+%   disp('CCFind ERROR: Could not find a match.');
   return;
 end
 

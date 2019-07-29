@@ -20,7 +20,7 @@ if nargin == 2
         indpar = find(options==',');
         options = strcat(options(1),'''',options(2:(indpar(1)-1)),'''',... % save_file
                     options(indpar(1)),'''',options((indpar(1)+1):(indpar(2)-1)),'''',... % save_im
-                    options(indpar(2):end));
+                    options(indpar(2):end)); % Yeah this is ugly but necessary and still needs to be done for options{9} too (location of the LUT)
         options = eval(options);
         save_file = options{1};
         save_im   = options{2};
@@ -172,10 +172,11 @@ for i = center
             tmpLAB = rgb2lab(lut);
             OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
             OER((OER-limit)<=0)=0;
-            OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
+            Moer = 0.880797077977882; % OER of rgb2lab([1 1 1])
+            OER = 1/Moer*OER; 
             HW=zeros(9,length(OER));
             for k = 1:9
-                HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
+                HW(k,:)=interp1([0 limit/2/Moer limit/Moer 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
             end
             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
         else
@@ -185,8 +186,8 @@ for i = center
         lut(lut > 1)    = 1;
         lut = lut.^(1/values{i}.gamma(2));
         write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
-        struct_name = strcat(save_file,'lut',num2str(i), '.mat');
-        save(struct_name, 'lut', '-v7.3');
+%         struct_name = strcat(save_file,'lut',num2str(i), '.mat');
+%         save(struct_name, 'lut', '-v7.3');
     end 
 
 % %     Only to apply the results of the cropped color checker to non
@@ -199,10 +200,11 @@ for i = center
 %         tmpLAB = rgb2lab(lut);
 %         OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
 %         OER((OER-limit)<=0)=0;
-%         OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
+%         Moer = 0.880797077977882; % OER of rgb2lab([1 1 1])
+%         OER = 1/Moer*OER; 
 %         HW=zeros(9,length(OER));
 %         for k = 1:9
-%             HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
+%             HW(k,:)=interp1([0 limit/2/Moer limit/Moer 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
 %         end
 %         lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
 %     else
@@ -212,7 +214,11 @@ for i = center
 %     lut(lut > 1)    = 1;
 %     lut = lut.^(1/values{i}.gamma(2));
 %     lut = reshape(lut,size(imnc{i}));
-%     filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
+%     if spread
+%         filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
+%     else
+%         filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/center_cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
+%     end
 %     exrwrite(lut,filename);
 
     
@@ -277,10 +283,11 @@ for nbr = 1:nbrContours
                 tmpLAB = rgb2lab(lut);
                 OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
                 OER((OER-limit)<=0)=0;
-                OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
+                Moer = 0.880797077977882; % OER of rgb2lab([1 1 1])
+                OER = 1/Moer*OER; 
                 HW=zeros(9,length(OER));
                 for k = 1:9
-                    HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
+                    HW(k,:)=interp1([0 limit/2/Moer limit/Moer 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
                 end
                 lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
             else
@@ -290,8 +297,8 @@ for nbr = 1:nbrContours
             lut(lut > 1)    = 1;
             lut = lut.^(1/values{i}.gamma(2));
             write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
-            struct_name = strcat(save_file,'lut',num2str(i), '.mat');
-            save(struct_name, 'lut', '-v7.3');
+%             struct_name = strcat(save_file,'lut',num2str(i), '.mat');
+%             save(struct_name, 'lut', '-v7.3');
         end
         
 % %     Only to apply the results of the cropped color checker to non
@@ -304,10 +311,11 @@ for nbr = 1:nbrContours
 %             tmpLAB = rgb2lab(lut);
 %             OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
 %             OER((OER-limit)<=0)=0;
-%             OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
+%             Moer = 0.880797077977882; % OER of rgb2lab([1 1 1])
+%             OER = 1/Moer*OER; 
 %             HW=zeros(9,length(OER));
 %             for k = 1:9
-%                 HW(k,:)=interp1([0 limit/2 limit 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
+%                 HW(k,:)=interp1([0 limit/2/Moer limit/Moer 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
 %             end
 %             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
 %         else
@@ -317,7 +325,11 @@ for nbr = 1:nbrContours
 %         lut(lut > 1)    = 1;
 %         lut = lut.^(1/values{i}.gamma(2));
 %         lut = reshape(lut,size(imnc{i}));
-%         filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
+%         if spread
+%             filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
+%         else
+%             filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/center_cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
+%         end
 %         exrwrite(lut,filename);
         
         %% Define the limit ranges for the weighting function
@@ -340,8 +352,8 @@ if write
         mkdir(save_im);
     end
     for i = 1:size(values,2)
-    filename = strcat(save_im,num2str(i),'.png');
-   imwrite(values{i}.I1exp0,filename);
+    filename = strcat(save_im,num2str(i),'.exr');
+    exrwrite(values{i}.I1exp0,filename);
     end
 end
 

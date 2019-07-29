@@ -270,10 +270,11 @@ if l<1
     tmpLAB = rgb2lab(tmp0);
     OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
     OER((OER-l)<=0)=0;
-    OER = 1/0.880797077977882*OER; % OER of rgb2lab([1 1 1])
+    Moer = 0.880797077977882; % OER of rgb2lab([1 1 1])
+    OER = 1/Moer*OER;
     HW=zeros(9,length(OER));
     for k = 1:9
-        HW(k,:)=interp1([0 l/2 l 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
+        HW(k,:)=interp1([0 l/2/Moer l/Moer 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
     end
     I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(OER)]),2))' , size(I1) );
 else
