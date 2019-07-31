@@ -4,7 +4,7 @@
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-folder = strcat(pwd,'/../LFColorSample/cropped_take4_5/EXR');
+folder = strcat(pwd,'/../LFColorSample/take4_5/');
 subdir = dir(folder);
 saved_data = '/saved_data/cropped20/';
 output = '/output/nocropped20/';
@@ -25,7 +25,7 @@ options.save_file = []; % name of the folder to save results
 options.save_im   = []; % name of the folder to save images
 options.exp0      = -1; % if exp0 < 0, the algorithm takes the middle exposure at the center
 options.clipping  = [15 240]; % min & max values for clipping e.g. [0 255]
-options.factor    = [1 sqrt(0.2)]; % first value is for final result, second value for computational purposes.
+options.factor    = [1 sqrt(0.3)]; % first value is for final result, second value for computational purposes.
 options.spread    = 1; % enables spreading references, 0 single ref at the center
 options.sift      = 1; 
 options.dense     = 0;
@@ -33,24 +33,24 @@ options.id_lut    = [];%strcat(pwd,'/src/lut/id_lut.mat');
 options.limit     = 0.5; % limit after which the homography will be less applied (in linear color space)
       
 startTime = tic;
-lfcs_method( strcat(folder, '/'), options );
-prefixe = strcat(pwd,'/output/spreadvsnospread/0');
-for i=[0.2 0.4 0.6 1]
-    options.factor(2) = sqrt(i);
-    % spread
-    options.spread = 1;
-%     options.save_im = strcat(prefixe,num2str(10*i),'0/spread/');
-%     if isempty(dir(options.save_im))
-%         mkdir(options.save_im);
-%     end
-    lfcs_method( strcat(folder, '/'), options );
-    % nospread
-    options.spread = 0;
-%     options.save_im = strcat(prefixe,num2str(10*i),'0/nospread/');
-%     if isempty(dir(options.save_im))
-%         mkdir(options.save_im);
-%     end
-    lfcs_method( strcat(folder, '/'), options );
-end
+lfcs_method( folder, options );
+% prefixe = strcat(pwd,'/output/spreadvsnospread/0');
+% for i=[0.2 0.4 0.6 1]
+%     options.factor(2) = sqrt(i);
+%     % spread
+%     options.spread = 1;
+% %     options.save_im = strcat(prefixe,num2str(10*i),'0/spread/');
+% %     if isempty(dir(options.save_im))
+% %         mkdir(options.save_im);
+% %     end
+%     lfcs_method( folder, options );
+%     % nospread
+%     options.spread = 0;
+% %     options.save_im = strcat(prefixe,num2str(10*i),'0/nospread/');
+% %     if isempty(dir(options.save_im))
+% %         mkdir(options.save_im);
+% %     end
+%     lfcs_method( strcat(folder, '/'), options );
+% end
 t = toc( startTime );
 disp(['   It took ' , num2str(t), ' s'])

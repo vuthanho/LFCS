@@ -159,13 +159,25 @@ for i = center
     values{i} = compute_colorstabilization( double( imresize(im{i}, factor(1),'bilinear', 'Colormap', 'original') )./max_im, ...
         im_med, im_med_exp0, clip, gamma, use_sift, [] , l);
     values{i}.I1exp0 = (values{i}.I1exp0).^(1/values{i}.gamma(2));
-%     Saving the LUT
+%       Saving the LUT
+
+%       Sorry Trevor I know this is not clean.
+%       The LUTs are computed in lfcs_method whereas the corrected views are
+%       computed in compute_colostabilization. I didn't want to create a
+%       function whose purpose would be to apply the transformation both to
+%       the view and to the id_lut because I don't like the idea of charging 
+%       an additionnal 1200x1920x3 double + 33x33x33 double in memory when 
+%       it can be avoided. The inconvenience is that if you modify
+%       something about the detection of OER in compute_colorstabilization
+%       you will probably have to modify it here for the first calculation
+%       and whole calculation
+
     if to_save
         lut = id_lut .^ values{i}.gamma(1);
         H = values{i}.H;
         limit=l^values{i}.gamma(2);
 
-% %         Detection of overexposured region
+% %         Detection of overexposed region
 
         Id = diag( [ max(max(im_med_exp0(:,:,1)))/max(lut(:,1)) max(max(im_med_exp0(:,:,2)))/max(lut(:,2)) max(max(im_med_exp0(:,:,3)))/max(lut(:,3)) ] );
         if limit<1
@@ -186,40 +198,14 @@ for i = center
         lut(lut > 1)    = 1;
         lut = lut.^(1/values{i}.gamma(2));
         write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
+        
+%         Uncomment the two following lines if you want to test the
+%         LUTs directly as .mat files with the imlut function. imho it will 
+%         be easier than applying the .CUBE files in davinci
+        
 %         struct_name = strcat(save_file,'lut',num2str(i), '.mat');
 %         save(struct_name, 'lut', '-v7.3');
     end 
-
-% %     Only to apply the results of the cropped color checker to non
-%       cropped views
-%     H = values{i}.H;
-%     limit=l^values{i}.gamma(2);
-%     lut = reshape(im2double(imnc{i}), [], 3);
-%     Id = diag( [ max(max(im_med_exp0(:,:,1)))/max(lut(:,1)) max(max(im_med_exp0(:,:,2)))/max(lut(:,2)) max(max(im_med_exp0(:,:,3)))/max(lut(:,3)) ] );
-%     if limit<1
-%         tmpLAB = rgb2lab(lut);
-%         OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
-%         OER((OER-limit)<=0)=0;
-%         Moer = 0.880797077977882; % OER of rgb2lab([1 1 1])
-%         OER = 1/Moer*OER; 
-%         HW=zeros(9,length(OER));
-%         for k = 1:9
-%             HW(k,:)=interp1([0 limit/2/Moer limit/Moer 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
-%         end
-%         lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
-%     else
-%         lut = ( H * lut' )';
-%     end
-%     lut(lut < 0)    = 0;
-%     lut(lut > 1)    = 1;
-%     lut = lut.^(1/values{i}.gamma(2));
-%     lut = reshape(lut,size(imnc{i}));
-%     if spread
-%         filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
-%     else
-%         filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/center_cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
-%     end
-%     exrwrite(lut,filename);
 
     
     %% Define the limit ranges for the weighting function
@@ -259,16 +245,25 @@ for nbr = 1:nbrContours
         if ~spread
             disp(['Calculating image ', num2str(i),' --> image ', num2str(exp0)  ])
             values{i} = compute_colorstabilization( double( imresize(im{i},factor(1),'bilinear' , 'Colormap', 'original') )./max_im, ...
-            im_med, im_med_exp0,... %imresize(values{exp0}.I1exp0, factor(2),'bilinear', 'Colormap', 'original'),  ...
-            clip, gamma, use_sift,[],l);%[values{exp_neighbour}.gamma(1) values{exp_neighbour}.H(:)'] );
+            im_med, im_med_exp0,clip, gamma, use_sift,[],l);
         else
             disp(['Calculating image ', num2str(i),' --> image ', num2str(image(2))])
             values{i} = compute_colorstabilization( double( imresize(im{i},factor(1),'bilinear' , 'Colormap', 'original') )./max_im, ...
             im_med, imresize(values{image(2)}.I1exp0, factor(2),'bilinear', 'Colormap', 'original'),  ...
-            clip, gamma, use_sift,[],l);%[values{exp_neighbour}.gamma(1) values{exp_neighbour}.H(:)'] );
+            clip, gamma, use_sift,[],l);
         end
         values{i}.I1exp0 = (values{i}.I1exp0).^(1/values{i}.gamma(2));
-%     Saving the LUT
+        
+%       Saving the LUT
+
+%       Sorry Trevor I know this is not clean.
+%       The LUTs are computed in lfcs_method whereas the corrected views are
+%       computed in compute_colostabilization. I didn't want to create a
+%       function whose purpose would be to apply the transformation both to
+%       the view and to the id_lut because I don't like the idea of charging 
+%       an additionnal 1200x1920x3 double + 33x33x33 double in memory when 
+%       it can be avoided.
+
         if to_save
             lut = id_lut .^ values{i}.gamma(1);
             H = values{i}.H;        
@@ -297,40 +292,14 @@ for nbr = 1:nbrContours
             lut(lut > 1)    = 1;
             lut = lut.^(1/values{i}.gamma(2));
             write_cube(strcat(save_file,num2str(i),'.CUBE'),num2str(i), [0.0 0.0 0.0], [1.0 1.0 1.0], lut' );
+            
+%             Uncomment the two following lines if you want to test the
+%             LUTs directly as .mat files with the imlut function. imho it  
+%             will be easier than applying the .CUBE files in davinci
+
 %             struct_name = strcat(save_file,'lut',num2str(i), '.mat');
 %             save(struct_name, 'lut', '-v7.3');
         end
-        
-% %     Only to apply the results of the cropped color checker to non
-%       cropped views
-%         H = values{i}.H;
-%         limit=l^values{i}.gamma(2);
-%         lut = reshape(im2double(imnc{i}), [], 3);
-%         Id = diag( [ max(max(im_med_exp0(:,:,1)))/max(lut(:,1)) max(max(im_med_exp0(:,:,2)))/max(lut(:,2)) max(max(im_med_exp0(:,:,3)))/max(lut(:,3)) ] );
-%         if limit<1
-%             tmpLAB = rgb2lab(lut);
-%             OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
-%             OER((OER-limit)<=0)=0;
-%             Moer = 0.880797077977882; % OER of rgb2lab([1 1 1])
-%             OER = 1/Moer*OER; 
-%             HW=zeros(9,length(OER));
-%             for k = 1:9
-%                 HW(k,:)=interp1([0 limit/2/Moer limit/Moer 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
-%             end
-%             lut = reshape( squeeze(sum(reshape(HW.*(kron(lut,ones(1,3))'),[3 3 length(OER)]),2))' , size(lut) );
-%         else
-%             lut = ( H * lut' )';
-%         end
-%         lut(lut < 0)    = 0;
-%         lut(lut > 1)    = 1;
-%         lut = lut.^(1/values{i}.gamma(2));
-%         lut = reshape(lut,size(imnc{i}));
-%         if spread
-%             filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
-%         else
-%             filename = strcat('/home/bonnetvalentin/Documents/LFCS/Test/output/center_cropped',num2str(round(10*(factor(2)^2))),'0/',num2str(i),'.exr');
-%         end
-%         exrwrite(lut,filename);
         
         %% Define the limit ranges for the weighting function
         clip_vR(i,:) = [ values{i}.min_clip(1) values{i}.max_clip(1)];

@@ -72,41 +72,6 @@ if( exist('v','var') )
     end
 end
 
-%% removes the correspondences in the MacBeth Color Checker to prove that the algorithm works without it
-
-% [heigth,width,~] = size(I1); 
-% CCCor=CCFind(I1(1:round(heigth/2),round(width/2):width,:));
-% if ~isempty(CCCor)
-%     M1=min(CCCor);
-%     M2=max(CCCor);
-%     P1=M1-0.5*[1/5 1/3].*(M2-M1);
-%     P2=M2+0.5*[1/5 1/3].*(M2-M1);
-%     P1=floor(length(I1tmp)/length(I1)*(P1+[0 959]));
-%     P2=ceil(length(I1tmp)/length(I1)*(P2+[0 959]));
-%     inbeth = (pos1>P1') & (pos1<P2');
-%     ininbeth = inbeth(1,:) & inbeth(2,:);
-%     pos1(:,ininbeth) = [];
-%     pos2(:,ininbeth) = [];
-%     I1_reshape( ininbeth, : ) = [];
-%     I2_reshape( ininbeth, : ) = [];
-% end
-% I1tmp = imfilter(I1tmp,ones(3,3)/9);
-% I2tmp = imfilter(I2tmp,ones(3,3)/9);
-% I1_reshape = impixel(I1tmp, pos1(2,:), pos1(1,:));
-% I2_reshape = impixel(I2tmp, pos2(2,:), pos2(1,:));
-
-% if use_sift(1)
-%     subplot (1,2,1);
-%     imshow ((I1tmp./max(I1tmp(:))));
-%     hold on;
-%     plot (pos1(2,:), pos1(1,:), 'b*');
-% 
-%     subplot (1,2,2);
-%     imshow ((I2tmp./max(I2tmp(:))));
-%     hold on;
-%     plot (pos2(2,:), pos2(1,:), 'r*');
-%     drawnow
-% end
 
 %% Estimate gamma values and color correction matrix H
 % disp '   Estimate gamma values and matrix H ----------------------------------------------'
@@ -263,23 +228,50 @@ tmp0  = reshape(I1_c, [], 3);
 
 % I12tmp = ( H * tmp0' )' ;
 % I12tmp = (1-OER).*I12tmp + mean(max(I12tmp))/mean(max(tmp0))*OER.*tmp0;
+
+% Weighted identity POSSIBLE ISSUE : Maybe I shouldn't normalize by the max
+% of each channel, but rather by RGB values of the pixel with the highest intensity
+
 Id = diag( [ max(max(I2tmp(:,:,1)))/max(max(I1tmp(:,:,1))) ...
              max(max(I2tmp(:,:,2)))/max(max(I1tmp(:,:,2))) ...
              max(max(I2tmp(:,:,3)))/max(max(I1tmp(:,:,3))) ] );
+         
+         
 if l<1
     tmpLAB = rgb2lab(tmp0);
+    
+% %     Investigation in progress to improve to correction of the blacks
+
+%     negtmpLAB = rgb2lab(1-tmp0);
+%     negOER = 0.5*(tanh(1/60.*((negtmpLAB(:,1)-80)+(40-sqrt(negtmpLAB(:,2).^2+negtmpLAB(:,3).^2))))+1);
+% %    0.85 seems to be a nice value 
+%     negOER((negOER-0.85)<=0)=0;
+%     imagesc(reshape(negOER,[1200 1920]))
+    
+    
+    % Formula to detect the over exposed regions, 1/60,80 and 40 can be
+    % customized to make the correction less "agressive"
     OER = 0.5*(tanh(1/60.*((tmpLAB(:,1)-80)+(40-sqrt(tmpLAB(:,2).^2+tmpLAB(:,3).^2))))+1);
     OER((OER-l)<=0)=0;
-    Moer = 0.880797077977882; % OER of rgb2lab([1 1 1])
+    
+    % OER of rgb2lab([1 1 1])
+    Moer = 0.880797077977882;
+    
+    % Normalization
     OER = 1/Moer*OER;
+    
     HW=zeros(9,length(OER));
     for k = 1:9
-        HW(k,:)=interp1([0 l/2/Moer l/Moer 1],[H(k) H(k) H(k) Id(k)],OER,'pchip');
+        % Interpolation
+        HW(k,:)=interp1([0 l/2/Moer l/Moer 1],[H(k) H(k) H(k) Id(k)],OER,'pchip'); 
     end
-    I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(OER)]),2))' , size(I1) );
+    % Applying the customized transformation with a little trick to make it
+    % way quicker than a for loop
+    I12 = reshape( squeeze(sum(reshape(HW.*(kron(tmp0,ones(1,3))'),[3 3 length(OER)]),2))' , size(I1) ); 
 else
     I12 = reshape( ( H * tmp0' )', size(I1) );
 end
+% Clipping
 I12(I12 < 0)    = 0;
 I12(I12 > 1)    = 1;
 %% Define mask
